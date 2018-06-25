@@ -57,7 +57,7 @@ class SkipGramNS(object):
     
     def return_word_vec(self):
         """
-
+        a
         """
 
 class MySkipGramNSModel(tf.keras.Model):
