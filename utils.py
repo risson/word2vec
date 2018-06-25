@@ -63,6 +63,7 @@ def corpus_reader(corpus_file, word_count, word_id_dict, id_word_dict, context_w
                   subsampling_t, subsampling_thres, negative_sample_size, negative_array):
     """
     """
+    total_word_cnt = sum(_[1] for _ in word_count.items())
     def reader():
         with open(corpus_file) as fopen:
             for line in fopen:
@@ -72,29 +73,39 @@ def corpus_reader(corpus_file, word_count, word_id_dict, id_word_dict, context_w
 
                 if random_window_size:
                     cur_window = random.randint(1, context_window)
+                else:
+                    cur_window = context_window
                 
                 for i in range(len(word_ids)):
                     target = word_ids[i]
                     target_word = id_word_dict[target]
-                    freq = word_count[target_word]
+                    freq = word_count[target_word]/total_word_cnt
                     if discard_word(subsampling_t, subsampling_thres, freq):
                         continue
                     
                     context_list = []
                     context_list.append(target)
                     # generate positive sample
-                    for j in range(i-cur_window, i+cur_window):
-                        if j<0 or j==i:
+                    j = i-cur_window
+                    while (j <= i+cur_window):
+                        while (j<0):
+                            j += 1
+                        if j==i: 
+                            j += 1
                             continue
-                        pos_context = word_ids[j]
-                        context_list.append(pos_context)
-                        yield ((target, pos_context),1)
+                        elif j==len(word_ids): break
+                        else:
+                            pos_context = word_ids[j]
+                            context_list.append(pos_context)
+                            j += 1
+                            yield ((target, pos_context),1)
                     
                     # generate negative sample
                     for _ in range(cur_window*2*negative_sample_size):
-                        neg_context = negative_sample_generate(negative_array)
-                        while neg_context in context_list:
-                            neg_context = negative_sample_generate(negative_array)
+                        neg_context_word = negative_sample_generate(negative_array)
+                        while neg_context_word in context_list:
+                            neg_context_word = negative_sample_generate(negative_array)
+                        neg_context = word_id_dict[neg_context_word]
                         yield ((target, neg_context),0)
     return reader
                         
@@ -107,10 +118,12 @@ def discard_word(t, threshold, freq):
 
 
 if __name__ == "__main__":
-    corpusfile = "C:/Users/risson.yao/word2vec/testpage.txt"
+    corpusfile = "/Users/risson/git/word2vec/testpage.txt"
     a,b,c,d = preprocess_corpus_file(corpusfile)
 
 
-    negarray = negative_sample_array(a,c,100)
-    reader = corpus_reader(corpusfile, c, a, b, 2, False, 1e-5, 0, 1, negarray)
+    negarray = negative_sample_array(a,c,100000)
+    reader = corpus_reader(corpusfile, c, a, b, 2, False, 1e-5, 1, 1, negarray)
+    for _ in reader():
+        print(_)
    
