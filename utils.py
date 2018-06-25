@@ -59,7 +59,7 @@ def negative_sample_generate(negative_array):
     index = random.randint(0, len(negative_array))
     return negative_array[index]
 
-def corpus_reader(corpus_file, word_count, word_id_dict, context_window, random_window_size,
+def corpus_reader(corpus_file, word_count, word_id_dict, id_word_dict, context_window, random_window_size,
                   subsampling_t, subsampling_thres, negative_sample_size, negative_array):
     """
     """
@@ -75,7 +75,8 @@ def corpus_reader(corpus_file, word_count, word_id_dict, context_window, random_
                 
                 for i in range(len(word_ids)):
                     target = word_ids[i]
-                    freq = word_count[target]
+                    target_word = id_word_dict[target]
+                    freq = word_count[target_word]
                     if discard_word(subsampling_t, subsampling_thres, freq):
                         continue
                     
@@ -97,11 +98,6 @@ def corpus_reader(corpus_file, word_count, word_id_dict, context_window, random_
                         yield ((target, neg_context),0)
     return reader
                         
-                        
-
-                    
-
-
 
 def discard_word(t, threshold, freq):
     p_discard = 1 - (t/freq)**0.5
@@ -111,7 +107,10 @@ def discard_word(t, threshold, freq):
 
 
 if __name__ == "__main__":
-    a,b,c,d = preprocess_corpus_file("/Users/risson/git/word2vec/testpage.txt")
-    print(a)
-    print(b)
-    print(c)
+    corpusfile = "C:/Users/risson.yao/word2vec/testpage.txt"
+    a,b,c,d = preprocess_corpus_file(corpusfile)
+
+
+    negarray = negative_sample_array(a,c,100)
+    reader = corpus_reader(corpusfile, c, a, b, 2, False, 1e-5, 0, 1, negarray)
+   
