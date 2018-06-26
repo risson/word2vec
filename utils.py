@@ -1,9 +1,16 @@
 import numpy as np
+from xml.dom import minidom
 import random
 import re
 
+def preprocess_file(raw_file):
+    fopen = open(raw_file, encoding='utf8')
+    doc = minidom.parse(fopen)
+    text = doc.getElementsByTagName('text')
+    fopen.close()
+    return text
 
-def preprocess_corpus_file(corpus_file, lowfreq_unk_thres=0):
+def build_corpus_dicts(corpus_file, lowfreq_unk_thres=0):
     """
     """
     word_to_id = {}
@@ -115,15 +122,17 @@ def discard_word(t, threshold, freq):
     if p_discard >= threshold:
         return True
 
-
-
 if __name__ == "__main__":
-    corpusfile = "/Users/risson/git/word2vec/testpage.txt"
-    a,b,c,d = preprocess_corpus_file(corpusfile)
+    # corpusfile = "/Users/risson/git/word2vec/testpage.txt"
+    # a,b,c,d = build_corpus_dicts(corpusfile)
+
+    # negarray = negative_sample_array(a,c,100000)
+    # reader = corpus_reader(corpusfile, c, a, b, 2, False, 1e-5, 1, 1, negarray)
+    # for _ in reader():
+    #     print(_)
+
+    corpus = preprocess_file("C:/Users/risson.yao/Documents/AI Edu/NLP/enwik9/enwik9.xml")
+    print(len(corpus))
 
 
-    negarray = negative_sample_array(a,c,100000)
-    reader = corpus_reader(corpusfile, c, a, b, 2, False, 1e-5, 1, 1, negarray)
-    for _ in reader():
-        print(_)
    

@@ -26,7 +26,7 @@ class SkipGramNS(object):
         loss: define the loss function. Possible values are: "binary_crossentropy", "hinge"...
         """
         self._corpus_file = corpus_file
-        self._word_to_id, _id_to_word, word_count, _vocab_size = utils.preprocess_corpus_file(corpus_file, separator, punct_kept, lowfreq_unk_thres)
+        self._word_to_id, _id_to_word, word_count, _vocab_size = utils.build_corpus_dicts(corpus_file, separator, punct_kept, lowfreq_unk_thres)
         self._model = self.__init_model__(self._vocab_size, embed_dim, optimizer, loss)
 
     def __init_model__(self, vocab_size, embed_dim, optimizer, loss):
