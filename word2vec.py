@@ -37,7 +37,15 @@ class SkipGramNS(object):
         target = tf.keras.Input(shape=(self._vocab_size,), name="target")
         context = tf.keras.Input(shape=(self._vocab_size,), name="context")
 
-        model = MySkipGramNSModel(inputs=[target,context])
+        shared_embed = tf.keras.layers.Embedding(vocab_size, embed_dim, input_length=1, name="shared_embedding")
+
+        target_embed = shared_embed(target)
+        context_embed = shared_embed(context)
+        merged_vec = tf.keras.layers.dot([target_embed, context_embed], axes=-1)
+        reshaped_vec = tf.keras.layers.Reshape((1,), input_shape=(1,1))(merged_vec)
+        prediction = tf.keras.layers.Dense(units=1, input_shape=(1,), activation="sigmoid")(reshaped_vec)
+        
+        model = tf.keras.Model(inputs=[target,context], outputs=prediction)
         model.compile(optimizer=optimizer, loss=loss)
         return model
     
@@ -96,17 +104,3 @@ class SkipGramNS(object):
             for idx, vec in enumerate(self._model.layers[2].get_weights()[0].tolist()):
                 f.write("%s %s\n" % (self._id_to_word[idx], " ".join(str(_) for _ in vec)))
         
-
-class MySkipGramNSModel(tf.keras.Model):
-
-    def __init__(self):
-        self.shared_embed = tf.keras.layers.Embedding(vocab_size, embed_dim, input_length=1, name="shared_embed")
-        self.reshaped_layer = tf.keras.layers.Reshape((1,), input_shape(1,1))
-        self.sigmoid_dense = tf.keras.layers.Dense(1, input_shape=(1,) activation="sigmoid")
-
-    def call(self, inputs):
-        target_embed = self.shared_embed(inputs[0])
-        context_embed = self.shared_embed(inputs[1])
-        merged_vector = tf.keras.layers.dot([target_embed, context_embed], axes=-1)
-        reshaped_vector = self.reshaped_layer(merged_vector)
-        return sigmoid_dense(reshaped_vector)

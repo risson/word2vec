@@ -14,7 +14,7 @@ def build_corpus_dicts(corpus_file, lowfreq_unk_thres=0):
     total_cnt = 0
     with open(corpus_file) as fopen:
         for line in fopen:
-            line = re.sub("[\.\!\/_,$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）]+", "",line)
+            line = re.sub("[\.\!\/_,\[\]\-$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）]+", "",line)
             for word in line.strip().split(" "):
                 if word is "":
                     continue
@@ -69,7 +69,7 @@ def corpus_reader(corpus_file, word_count, word_id_dict, id_word_dict, context_w
     def reader():
         with open(corpus_file) as fopen:
             for line in fopen:
-                line = re.sub("[\.\!\/_,$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）]+", "",line)
+                line = re.sub("[\.\!\/_,\[\]\-$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）]+", "",line)
                 line_list = line.strip().split(" ")
                 word_ids = [word_id_dict.get(_.lower(), word_id_dict.get("<UNK>")) for _ in line_list]
 
