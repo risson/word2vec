@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import sys
 import random
 import re
+import string
   
 
 def build_corpus_dicts(corpus_file, lowfreq_unk_thres=0):
@@ -12,11 +13,14 @@ def build_corpus_dicts(corpus_file, lowfreq_unk_thres=0):
     id_to_word = {}
     word_count = {}
     total_cnt = 0
+    re_tok = re.compile(f'([{string.punctuation}“”¨«»®´·º½¾¿¡§£₤‘’])')
+    def tokenize(s): return re_tok.sub(r' \1 ', s).split()
+        
     with open(corpus_file) as fopen:
         for line in fopen:
-            line = re.sub("[\.\!\/_,\[\]\-$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）]+", "",line)
-            for word in line.strip().split(" "):
-                if word is "":
+            line_list = tokenize(line)
+            for word in line_list:
+                if word in string.punctuation:
                     continue
                 word = word.lower()
                 if word not in word_count:
@@ -67,10 +71,14 @@ def corpus_reader(corpus_file, word_count, word_id_dict, id_word_dict, context_w
     """
     total_word_cnt = sum(_[1] for _ in word_count.items())
     def reader():
+        
+        re_tok = re.compile(f'([{string.punctuation}“”¨«»®´·º½¾¿¡§£₤‘’])')
+        def tokenize(s): return re_tok.sub(r' \1 ', s).split()
+
         with open(corpus_file) as fopen:
             for line in fopen:
-                line = re.sub("[\.\!\/_,\[\]\-$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）]+", "",line)
-                line_list = line.strip().split(" ")
+                line_list = tokenize(line)
+                line_list = [_ for _ in line_list if _ not in string.punctuation]
                 word_ids = [word_id_dict.get(_.lower(), word_id_dict.get("<UNK>")) for _ in line_list]
 
                 if random_window_size:
