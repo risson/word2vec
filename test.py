@@ -25,6 +25,16 @@ def cos_matrix_multiplication(matrix, vector):
     neighbors = np.divide(dotted, matrix_vector_norms)
     return neighbors
 
+def l2_distance(matrix, vector):
+    mx_subtract = np.subtract(matrix, vector)
+    return np.linalg.norm(mx_subtract, axis=1)
+
 def find_top_k(word, k=3):
-    wids = np.argsort(- cos_matrix_multiplication(embedding_matrix, embedding_matrix[word_index[word]]))[1:k+1]
+    #wids = np.argsort(- cos_matrix_multiplication(embedding_matrix, embedding_matrix[word_index[word]]))[1:k+1]
+    wids = np.argsort(l2_distance(embedding_matrix, embedding_matrix[word_index[word]]))[1:k+1]
     return [index_words[wid] for wid in wids]
+
+words = ["fast","gift","bad","device","phone","computer"]
+
+for word in words:
+    print("{}: {}".format(word, find_top_k(word)))

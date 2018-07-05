@@ -10,7 +10,7 @@ from pathlib import Path
 import json
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import make_sampling_table
-
+import gzip
 
 def negative_sample_array(tokenizer, negative_array_size=1e7):
     """
@@ -39,7 +39,7 @@ def corpus_reader(corpus_file, tokenizer, context_window, random_window_size,
     """
     
     lines = []
-    with open(corpus_file) as fopen:
+    with open(corpus_file, encoding='utf-8') as fopen:
         for idx, line in enumerate(fopen):
             if idx > 10000:
                 break
@@ -119,8 +119,10 @@ def process_json(input_file, output_file):
 
 if __name__ == "__main__":
     
-    input_json = "/Users/risson/Downloads/reviews_Electronics_5.json"
-    output_file = "/Users/risson/git/word2vec/reviews_Electronics_5.txt"
+    #input_json = "/Users/risson/Downloads/reviews_Electronics_5.json"
+    input_json = "C:/Users/risson.yao/word2vec/Electronics_5.json"
+    #output_file = "/Users/risson/git/word2vec/reviews_Electronics_5.txt"
+    output_file = "C:/Users/risson.yao/word2vec/reviews_Electronics_5.txt"
 
     if not Path(output_file).is_file():
         process_json(input_json, output_file)
@@ -135,22 +137,27 @@ if __name__ == "__main__":
             lines.append(line.strip())
 
 
+    # Quality check utils functions
     word_list = list(set(_ for line in lines for _ in line.split()))
-    print("vocab size")
-    print(len(word_list))
+    print("vocab size: {}".format(len(word_list)))
 
-    _tokenizer = Tokenizer(num_words=250)
+    _tokenizer = Tokenizer()
     _tokenizer.fit_on_texts(lines)
-    text_seq = _tokenizer.texts_to_sequences(lines)
-    print("vocab size by Tokenizer")
-    print(_tokenizer.num_words)
-    _word_count = _tokenizer.word_counts
+    print("vocab size by Tokenizer: {}".format(_tokenizer.num_words))
     
     neg_array = negative_sample_array(_tokenizer, negative_array_size=2000)
 
     creader = corpus_reader(corpus_file, _tokenizer, 2, True, 1e-5, 0, 1, neg_array)
     shuffle(creader, 20)
-    print("reader")
-    for _ in creader():
-        print(_)
+    
+    print("reader sample output:")
+
+    i = 0
+
+    for context, label in creader():
+        if i < 3:
+            print("{}, {}".format(context, label))
+        i += 1
+    
+    print("reader length: {}".format(i))
     

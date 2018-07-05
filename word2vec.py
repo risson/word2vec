@@ -7,10 +7,13 @@ import numpy as np
 from collections import Counter 
 import utils2
 from keras.models import Model, Sequential
-from keras.layers import Input, Embedding, dot, Reshape, Dense, Merge, Activation, merge
+from keras.layers import Input, Embedding, dot, Reshape, Dense, Activation, Lambda
+from keras.optimizers import Adam
 from keras.preprocessing.text import Tokenizer
+from keras import backend as K
 import datetime
 import pickle
+from pathlib import Path
 
 #tf.enable_eager_execution()
 
@@ -32,7 +35,7 @@ class SkipGramNS(object):
         # tf.enable_eager_execution()
         
         lines = []
-        with open("/Users/risson/git/word2vec/reviews_Electronics_5.txt") as fopen:
+        with open(corpus_file, encoding='utf-8') as fopen:
             for idx, line in enumerate(fopen):
                 if idx > 100000:
                     break
@@ -56,12 +59,25 @@ class SkipGramNS(object):
         shared_embed = Embedding(vocab_size, embed_dim, input_length=1, name="shared_embedding")
         target_embed = shared_embed(target)
         context_embed = shared_embed(context)
-        merged_vec = merge([target_embed, context_embed], mode="cos", dot_axes=-1)
+
+        # def cosine_distance(vests):
+        #     x, y = vests
+        #     x = K.l2_normalize(x, axis=-1)
+        #     y = K.l2_normalize(y, axis=-1)
+        #     return -K.mean(x * y, axis=-1, keepdims=True)
+
+        # def cos_dist_output_shape(shapes):
+        #     shape1, shape2 = shapes
+        #     return (shape1[0],1)
+
+        # merged_vec = Lambda(cosine_distance, output_shape=cos_dist_output_shape)([target_embed, context_embed])
+        merged_vec = dot([target_embed, context_embed], axes=-1, normalize=True)
         reshaped_vec = Reshape((1,))(merged_vec)
         prediction = Dense(units=1, activation="sigmoid")(reshaped_vec)
         
         model = Model(inputs=[target,context], outputs=prediction)
-        model.compile(optimizer="adam", loss="binary_crossentropy")
+        adam_optimizer = Adam(lr=0.001)
+        model.compile(optimizer=adam_optimizer, loss="binary_crossentropy")
         return model
     
     def save(self, path):
@@ -127,5 +143,17 @@ class SkipGramNS(object):
                     f.write("%s %s\n" % (word_dict[idx], " ".join(str(_) for _ in vec)))
         
 if __name__ == "__main__":
-    skgram = SkipGramNS("/Users/risson/git/word2vec/reviews_Electronics_5.txt")
+    
+    #input_json = "/Users/risson/Downloads/reviews_Electronics_5.json"
+    #input_json = "C:/Users/risson.yao/word2vec/Electronics_5.json"
+    #corpus_file = "/Users/risson/git/word2vec/reviews_Electronics_5.txt"
+    #corpus_file = "C:/Users/risson.yao/word2vec/reviews_Electronics_5.txt"
+
+    # if not Path(corpus_file).is_file():
+    #     process_json(input_json, corpus_file)
+    #     print("Finished converting json file into txt file.")
+
+    corpus_file = "C:/Users/risson.yao/word2vec/wiki-en-text.txt"
+
+    skgram = SkipGramNS(corpus_file)
     skgram.train()
