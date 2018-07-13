@@ -119,45 +119,57 @@ def process_json(input_file, output_file):
 
 if __name__ == "__main__":
     
-    #input_json = "/Users/risson/Downloads/reviews_Electronics_5.json"
-    input_json = "C:/Users/risson.yao/word2vec/Electronics_5.json"
-    #output_file = "/Users/risson/git/word2vec/reviews_Electronics_5.txt"
-    output_file = "C:/Users/risson.yao/word2vec/reviews_Electronics_5.txt"
+    # #input_json = "/Users/risson/Downloads/reviews_Electronics_5.json"
+    # input_json = "C:/Users/risson.yao/word2vec/Electronics_5.json"
+    # #output_file = "/Users/risson/git/word2vec/reviews_Electronics_5.txt"
+    # output_file = "C:/Users/risson.yao/word2vec/reviews_Electronics_5.txt"
 
-    if not Path(output_file).is_file():
-        process_json(input_json, output_file)
-        print("done")
+    # if not Path(output_file).is_file():
+    #     process_json(input_json, output_file)
+    #     print("done")
 
-    corpus_file = output_file
-    lines = []
-    with open(corpus_file) as fopen:
-        for idx, line in enumerate(fopen):
-            if idx > 1:
-                break
-            lines.append(line.strip())
+    # corpus_file = output_file
+    # lines = []
+    # with open(corpus_file) as fopen:
+    #     for idx, line in enumerate(fopen):
+    #         if idx > 1:
+    #             break
+    #         lines.append(line.strip())
 
 
-    # Quality check utils functions
-    word_list = list(set(_ for line in lines for _ in line.split()))
-    print("vocab size: {}".format(len(word_list)))
+    # # Quality check utils functions
+    # word_list = list(set(_ for line in lines for _ in line.split()))
+    # print("vocab size: {}".format(len(word_list)))
 
-    _tokenizer = Tokenizer()
-    _tokenizer.fit_on_texts(lines)
-    print("vocab size by Tokenizer: {}".format(_tokenizer.num_words))
+    # _tokenizer = Tokenizer()
+    # _tokenizer.fit_on_texts(lines)
+    # print("vocab size by Tokenizer: {}".format(_tokenizer.num_words))
     
-    neg_array = negative_sample_array(_tokenizer, negative_array_size=2000)
+    # neg_array = negative_sample_array(_tokenizer, negative_array_size=2000)
 
-    creader = corpus_reader(corpus_file, _tokenizer, 2, True, 1e-5, 0, 1, neg_array)
-    shuffle(creader, 20)
+    # creader = corpus_reader(corpus_file, _tokenizer, 2, True, 1e-5, 0, 1, neg_array)
+    # shuffle(creader, 20)
     
-    print("reader sample output:")
+    # print("reader sample output:")
 
+    # i = 0
+
+    # for context, label in creader():
+    #     if i < 3:
+    #         print("{}, {}".format(context, label))
+    #     i += 1
+    
+    # print("reader length: {}".format(i))
+
+    output = open('wiki-en-text-2m.txt', 'w', encoding='utf-8')
     i = 0
+    with open('wiki-en-text.txt','r',encoding='utf-8') as fo:
+        for line in fo:
+            output.write(line)
+            if i%100000==0:
+                print('write {} lines'.format(i))
+            if i > 1500000:
+                break
+            i += 1
 
-    for context, label in creader():
-        if i < 3:
-            print("{}, {}".format(context, label))
-        i += 1
-    
-    print("reader length: {}".format(i))
     

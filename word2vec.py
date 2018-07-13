@@ -83,8 +83,8 @@ class SkipGramNS(object):
     def save(self, path):
         self._model.save(path)
 
-    def train(self, epoches=10, batch_size=256, negative_sample_size=2, context_window=2, random_window_size=True,
-              negative_array_size=1e7, subsampling_t=1e-5,  subsampling_thres=0.8, is_shuffle=True):
+    def train(self, epoches=10, batch_size=256, negative_sample_size=1, context_window=2, random_window_size=True,
+              negative_array_size=1e8, subsampling_t=1e-5,  subsampling_thres=0.8, is_shuffle=True):
         """
         epoches: number of epoches. In 1 epoch we will process the entire input data set
         batch_size: size of the batch for 1 forward feeding and backprop
@@ -114,7 +114,7 @@ class SkipGramNS(object):
 
                 batch_id += 1
 
-                if batch_id%(batch_size*100)==0:
+                if batch_id%(batch_size*1000)==0:
                     print("Epoch {}: Batch_id - {}: Loss = {}".format(epoch, batch_id, np.mean(loss_list)))
                     loss_list = []
 
